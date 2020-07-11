@@ -10,6 +10,7 @@
 #include "mutex_sync.h"
 #include "producer_consumer_example.h"
 #include "condvar.h"
+#include "semaphore_example.h"
 
 int main(int argc, char **argv)
 {
@@ -19,6 +20,7 @@ int main(int argc, char **argv)
 	printf("3.mutex_sync_example\n");
 	printf("4.producer_consumer_example\n");
 	printf("5.condvar_example\n");
+	printf("6.semaphore_example\n");
 	printf("Please pick/enter a sequence number to run:");
 
 	int choice = 0;
@@ -39,6 +41,9 @@ int main(int argc, char **argv)
 		break;
 	case 5:
 		condvar_example();
+		break;
+	case 6:
+		semaphore_example();
 		break;
 	default:
 		printf("Invalid choice, exit.\n");
