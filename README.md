@@ -11,3 +11,4 @@ QNX beginer sample and learning meterials
 ## Sample Code
 
 * [Process&Thread](code/qnxprocessthread)
+* [IPC](code/qnxipc)
