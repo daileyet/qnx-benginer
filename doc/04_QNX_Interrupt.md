@@ -60,3 +60,102 @@ InterruptUnlock(struct intrspin *spinlock);
 ```
 
 使用这些QNX API前需要获得I/O的权限  `ThreadCtl(_NTO_TCTL_IO,0)`
+
+sample code:
+
+```c
+struct sigevent event;
+
+main(){
+  ThreadCtl(_NTO_TCTL_IO,0);
+  SIGEV_INTR_INIT(&event);
+  id = InterruptAttachEvent(INTNUM,&event,...);
+  for(;;){
+    InterruptWait(0,NULL);
+    // do the interrupt work here, at thread priority
+    InterruptUnmask(INTNUM,id);
+  }
+}
+```
+
+```c
+// to associate an event with an interrupt vector
+id = InterruptAttachEvent(intr, event, flags);
+```
+
+* intr  - logical interrupt vector number
+* event - tells the kernel how to wake up a thread
+* flags - additional information flags
+
+
+```c
+// to associate a handler with an interrupt vector
+id = InterruptAttach(intr,handler,area,size,flags);
+```
+
+* handler  - handler address
+* area - passed to your handler
+* size - size of area
+
+Logical interrupt vector numbers - 逻辑中断向量
+
+* 在启动时被定义
+* 会写在板子的buildfile文件中 ($QNX_TARGET/cpu/boot/build)
+
+## 通知方法
+
+* SIGEV_INTR/InterruptWait()
+  * 最简单也最快速
+  * 必须在一个线程里
+  * 队列里元素只有有1个
+* Pulse
+  * 可以在多线程下等待接收channel上的消息
+  * 可以队列化
+  * 最灵活
+* Signal
+  * 如果使用signal handler,那将是开销最大的方案
+  * 可以队列化
+
+### InterruptWait
+
+等待中断发生最简单的方法是:
+
+```
+InterruptWait(reserved,reserved);
+```
+
+NOTE: 等待的线程必须和附加handler的线程是同一个
+
+
+### Pulse
+
+```c
+#define INTR_PULSE _PULSE_CODE_MINAVAIL
+struct sigevent event;
+
+const struct sigevent* handler(void *area,int id){
+  // do work
+  return (&event); // wake up main thread
+}
+
+int main(){
+  chid = ChannelCreate(0);
+  coid = ConnectAttach(ND_LOCAL_NODE,0,chid,_NTO_SIDE_CHANNEL,0);
+  SIGEV_PULSE_INIT(&event,coid,MyPriority,INTR_PULSE,0);
+  InterruptAttach(intnum, handler,NULL,0,_NTO_INTR_FLAGS_TRK_MSK);
+  for(;;){
+    rcvid = MsgReceive(chid,...);
+    if(rcvid == -){
+      // got a pulse
+    }
+  }
+  return 0;
+}
+```
+### Sample
+
+* [sapmel1_intsimple.c](../code/qnxinterrupt/sample1_intsimple.c)
+
+![samle run result](img/04_intr_code_rst.png)
+
+NOTE: 需要以root权限运行
