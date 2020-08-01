@@ -15,6 +15,7 @@ QNX beginer sample and learning meterials
 4. [QNX Interrupt](doc/04_QNX_Interrupt.md)
 5. [QNX Screen](doc/05_QNX_Screen.md)
    * [Rendering](doc/05_QNX_Screen_Rendering.md)
+   * [Windowing](doc/05_QNX_Screen_Windowing.md)
 
 ## Sample Code
 
